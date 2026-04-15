@@ -1,23 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <script>
-        /** * GATEKEEPER LOGIC
-         * Kinukuha ang 'key' mula sa URL (e.g., index.html?key=SEANDREX45453)
-         */
+        // CONFIG: Palitan ito ng sa iyo mula sa Firebase Project Settings
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
+            authDomain: "cryptospeed-c5b79.firebaseapp.com",
+            databaseURL: "https://cryptospeed-c5b79-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "cryptospeed-c5b79",
+            storageBucket: "cryptospeed-c5b79.firebasestorage.app",
+            messagingSenderId: "833079727430",
+            appId: "1:833079727430:web:daf02cb49d5a61b94b8147"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const urlParams = new URLSearchParams(window.location.search);
         const accessKey = urlParams.get('key');
-        const VALID_KEY = "SEANDREX45453"; // Dito mo i-set ang master key mo
 
-        if (accessKey !== VALID_KEY) {
-            // Kung mali o walang key, i-redirect sa Access Denied o Login page
-            // Pwede mo rin itong palitan ng window.location.href = "Error.html"
-            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;}</style>");
-            document.write("<h1>403 FORBIDDEN</h1><p>Invalid System Access Key. Connection Terminated.</p>");
-            window.stop(); // Pinipigilan ang pag-load ng rest ng page
+        if (!accessKey) {
+            blockAccess();
         } else {
-            // Kung tama ang key, i-save sa session para hindi mawala habang nag-ne-navigate
-            sessionStorage.setItem('session_active', 'true');
+            database.ref('active_keys/' + accessKey).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists() && snapshot.val() === "valid") {
+                        sessionStorage.setItem('session_active', 'true');
+                    } else {
+                        blockAccess();
+                    }
+                })
+                .catch(() => blockAccess());
+        }
+
+        function blockAccess() {
+            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;}</style>");
+            document.write("<h1>403 FORBIDDEN</h1><p>Invalid or Expired System Access Key.</p>");
+            window.stop();
         }
     </script>
 
@@ -52,7 +74,6 @@
             overflow: hidden;
         }
 
-        /* Dashboard Container */
         #dashboard-home {
             flex-grow: 1;
             display: flex;
@@ -109,7 +130,6 @@
         .card-item img { width: 35px; height: 35px; margin-bottom: 10px; }
         .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
 
-        /* Frame View Area */
         #content-area {
             display: none;
             flex-grow: 1;
@@ -134,7 +154,6 @@
 
         #content-frame { flex-grow: 1; border: none; width: 100%; }
 
-        /* Modern Bottom Nav */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -178,7 +197,7 @@
 
     <div id="dashboard-home">
         <div class="welcome-card">
-            <h1>Crypto Speed</h1>
+            <h1>Crypto Hunter</h1>
             <p><i class="fa-solid fa-circle-check"></i> System Connected (VIP)</p>
         </div>
 
@@ -259,7 +278,6 @@
         }
 
         function exitSystem() {
-            // I-clear ang session at ibalik sa main URL na walang key
             sessionStorage.clear();
             window.location.href = window.location.pathname; 
         }

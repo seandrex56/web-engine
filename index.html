@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        /** * GATEKEEPER LOGIC
+         * Kinukuha ang 'key' mula sa URL (e.g., index.html?key=SEANDREX45453)
+         */
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessKey = urlParams.get('key');
+        const VALID_KEY = "SEANDREX45453"; // Dito mo i-set ang master key mo
+
+        if (accessKey !== VALID_KEY) {
+            // Kung mali o walang key, i-redirect sa Access Denied o Login page
+            // Pwede mo rin itong palitan ng window.location.href = "Error.html"
+            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;}</style>");
+            document.write("<h1>403 FORBIDDEN</h1><p>Invalid System Access Key. Connection Terminated.</p>");
+            window.stop(); // Pinipigilan ang pag-load ng rest ng page
+        } else {
+            // Kung tama ang key, i-save sa session para hindi mawala habang nag-ne-navigate
+            sessionStorage.setItem('session_active', 'true');
+        }
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Hunter - VIP System</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f4f7fa;
+            --card-bg: #ffffff;
+            --accent-blue: #0062ff;
+            --text-main: #1a1c1e;
+            --text-sub: #6c757d;
+            --border: #edf2f7;
+            --shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Dashboard Container */
+        #dashboard-home {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            padding-bottom: 100px; 
+        }
+
+        .welcome-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            text-align: left;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .welcome-card h1 { font-size: 22px; margin: 0; font-weight: 800; color: var(--accent-blue); }
+        .welcome-card p { font-size: 12px; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
+
+        .engine-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .section-title { font-size: 11px; font-weight: 800; color: #adb5bd; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .card-item {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .card-item:active { transform: scale(0.95); background: #f8f9fa; }
+        .card-item img { width: 35px; height: 35px; margin-bottom: 10px; }
+        .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
+
+        /* Frame View Area */
+        #content-area {
+            display: none;
+            flex-grow: 1;
+            flex-direction: column;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+        }
+
+        .header-nav {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn-round { 
+            background: #f1f3f5; border: none; width: 40px; height: 40px;
+            border-radius: 12px; cursor: pointer; color: var(--text-main); font-size: 18px;
+        }
+
+        #content-frame { flex-grow: 1; border: none; width: 100%; }
+
+        /* Modern Bottom Nav */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            height: 80px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-btn { 
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #adb5bd;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .nav-btn.active { color: var(--accent-blue); }
+        .nav-btn span { font-size: 10px; font-weight: 700; margin-top: 4px; }
+
+        .logout-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #ff4d4f;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-home">
+        <div class="welcome-card">
+            <h1>Crypto Hunter</h1>
+            <p><i class="fa-solid fa-circle-check"></i> System Connected (VIP)</p>
+        </div>
+
+        <div class="engine-container">
+            <span class="section-title">Engines Available</span>
+            <div class="grid">
+                <div class="card-item" onclick="loadPage('Eth.html')">
+                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png"><span>ETHEREUM</span>
+                </div>
+                <div class="card-item" onclick="loadPage('Btc.html')">
+                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png"><span>BITCOIN</span>
+                </div>
+                <div class="card-item" onclick="loadPage('Bnb.html')">
+                    <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"><span>BINANCE</span>
+                </div>
+                <div class="card-item" onclick="loadPage('Tron.html')">
+                    <img src="https://cryptologos.cc/logos/tron-trx-logo.png"><span>TRON</span>
+                </div>
+                <div class="card-item" onclick="loadPage('Doge.html')">
+                    <img src="https://cryptologos.cc/logos/dogecoin-doge-logo.png"><span>DOGE</span>
+                </div>
+                <div class="card-item" onclick="loadPage('Sol.html')">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png"><span>SOLANA</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="logout-link" onclick="exitSystem()">DISCONNECT SYSTEM</div>
+    </div>
+
+    <div id="content-area">
+        <div class="header-nav">
+            <button class="btn-round" onclick="goHome()"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="label-top" style="font-weight: 800; font-size: 12px; color: var(--accent-blue);">ENGINE ACTIVE</span>
+        </div>
+        <iframe id="content-frame" src=""></iframe>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-btn active" id="n-home" onclick="goHome()">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-btn" id="n-wallet" onclick="loadPage('Withdraw.html')">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Wallet</span>
+        </div>
+        <div class="nav-btn" id="n-rocket" onclick="loadPage('Rocket.html')">
+            <i class="fa-solid fa-rocket"></i>
+            <span>Boost</span>
+        </div>
+        <div class="nav-btn" id="n-user" onclick="loadPage('Profile.html')">
+            <i class="fa-solid fa-user"></i>
+            <span>Account</span>
+        </div>
+    </div>
+
+    <script>
+        function loadPage(page) {
+            document.getElementById('dashboard-home').style.display = 'none';
+            document.getElementById('content-area').style.display = 'flex';
+            document.getElementById('content-frame').src = page;
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if(page.includes('Withdraw')) document.getElementById('n-wallet').classList.add('active');
+            else if(page.includes('Rocket')) document.getElementById('n-rocket').classList.add('active');
+            else if(page.includes('Profile')) document.getElementById('n-user').classList.add('active');
+
+            document.getElementById('label-top').textContent = page.split('.')[0].toUpperCase() + " ACTIVE";
+        }
+
+        function goHome() {
+            document.getElementById('dashboard-home').style.display = 'flex';
+            document.getElementById('content-area').style.display = 'none';
+            document.getElementById('content-frame').src = "";
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('n-home').classList.add('active');
+        }
+
+        function exitSystem() {
+            // I-clear ang session at ibalik sa main URL na walang key
+            sessionStorage.clear();
+            window.location.href = window.location.pathname; 
+        }
+    </script>
+</body>
+</html>

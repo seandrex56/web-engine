@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Statistics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --accent-blue: #0062ff;
+            --text-dark: #1a1d21;
+            --soft-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            --border-color: #edf2f7;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: var(--bg-color); 
+            color: var(--text-dark);
+            padding-bottom: 60px;
+        }
+
+        .section-label { font-size: 17px; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sub-label { font-size: 11px; color: #718096; margin-bottom: 20px; font-weight: 600; }
+
+        /* Top Balance Cards */
+        .top-stats { display: flex; gap: 15px; margin-bottom: 25px; }
+        .stat-main { 
+            flex: 1; background: #1a1d21; color: #fff; padding: 22px; 
+            border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 1px solid #333;
+        }
+        .stat-main h3 { font-size: 22px; margin: 0; color: #00ff66; font-weight: 800; }
+        .stat-main p { font-size: 10px; margin: 6px 0 0 0; opacity: 0.7; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+
+        /* Blockchain Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .grid-item {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--soft-shadow);
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s ease;
+        }
+
+        .grid-item:active { transform: scale(0.98); background: #f8f9fa; }
+
+        .coin-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .coin-icon { width: 30px; height: 30px; }
+        .coin-name { font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase; }
+
+        .coin-balance { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+
+        /* Seed Phrase Box */
+        #seed-box {
+            display: none;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 25px;
+            border: 2px dashed var(--accent-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .seed-header-text { font-size: 11px; font-weight: 800; color: var(--accent-blue); }
+        .seed-text { 
+            background: #f4f7fa; padding: 18px; border-radius: 15px; 
+            font-size: 12px; color: #333; font-weight: 600; line-height: 1.8;
+            margin-top: 15px; border: 1px solid var(--border-color);
+            font-family: monospace;
+        }
+
+        /* Withdraw Button */
+        .withdraw-btn {
+            width: 100%;
+            padding: 20px;
+            border-radius: 25px;
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 25px rgba(0,98,255,0.25);
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        .withdraw-btn:active { transform: scale(0.96); background: #0056e0; }
+        .withdraw-btn i { margin-left: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="section-label">Wallet Balance</div>
+    <div class="sub-label">Total funds discovered by all engines</div>
+
+    <div class="top-stats">
+        <div class="stat-main">
+            <h3 id="total-all-time">$0.00</h3>
+            <p>Total Discovered</p>
+        </div>
+        <div class="stat-main" style="background: #00ff66; color: #004d21; border-color: #00ff66;">
+            <h3 id="total-recent" style="color: #004d21;">$0.00</h3>
+            <p>Recent Found</p>
+        </div>
+    </div>
+
+    <div class="section-label">Assets</div>
+    <div class="sub-label">Real-time data from local storage</div>
+
+    <div class="grid-container">
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-icon" alt="BTC">
+                <span class="coin-name">Bitcoin</span>
+            </div>
+            <div class="coin-balance" id="val-BTC">$0.00</div>
+        </div>
+        
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="coin-icon" alt="ETH">
+                <span class="coin-name">Ethereum</span>
+            </div>
+            <div class="coin-balance" id="val-ETH">$0.00</div>
+        </div>
+        
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png" class="coin-icon" alt="BNB">
+                <span class="coin-name">Binance</span>
+            </div>
+            <div class="coin-balance" id="val-BNB">$0.00</div>
+        </div>
+        
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/tron-trx-logo.png" class="coin-icon" alt="TRX">
+                <span class="coin-name">Tron</span>
+            </div>
+            <div class="coin-balance" id="val-TRX">$0.00</div>
+        </div>
+        
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="coin-icon" alt="SOL">
+                <span class="coin-name">Solana</span>
+            </div>
+            <div class="coin-balance" id="val-SOL">$0.00</div>
+        </div>
+        
+        <div class="grid-item">
+            <div class="coin-header">
+                <img src="https://cryptologos.cc/logos/dogecoin-doge-logo.png" class="coin-icon" alt="DOGE">
+                <span class="coin-name">Dogecoin</span>
+            </div>
+            <div class="coin-balance" id="val-DOGE">$0.00</div>
+        </div>
+    </div>
+
+    <div id="seed-box">
+        <span class="seed-header-text">
+            <i class="fa-solid fa-key"></i> RECOVERY PHRASE UNLOCKED
+        </span>
+        <div class="seed-text" id="seed-display">Waiting for data...</div>
+    </div>
+
+    <button class="withdraw-btn" onclick="revealSeed()">Withdraw Now <i class="fa-solid fa-download"></i></button>
+
+    <script>
+        // Pagbukas ng page, kunin agad lahat ng data sa localStorage
+        window.onload = function() {
+            const foundType = localStorage.getItem('last_found_type'); // Halimbawa: "ETH"
+            const foundBal = localStorage.getItem('last_found_balance') || "0.00";
+            
+            if(foundType) {
+                // I-update yung specific card (BTC, ETH, etc.) base sa type
+                const elementId = "val-" + foundType;
+                const element = document.getElementById(elementId);
+                if(element) {
+                    element.innerText = "$" + foundBal;
+                    
+                    // Optional: Bigyan ng konting 'found' border ang card para lilitaw
+                    element.closest('.grid-item').style.borderColor = "#00ff66";
+                    element.closest('.grid-item').style.borderWidth = "2px";
+                }
+                
+                // I-update yung top stats
+                document.getElementById('total-recent').innerText = "$" + foundBal;
+                document.getElementById('total-all-time').innerText = "$" + foundBal;
+            }
+        };
+
+        function revealSeed() {
+            const seed = localStorage.getItem('last_found_seed');
+            
+            if(!seed || seed === "") {
+                alert("No active wallet found to withdraw.");
+            } else {
+                // Ipakita yung box at yung seed phrase
+                document.getElementById('seed-box').style.display = 'block';
+                document.getElementById('seed-display').innerText = seed;
+                
+                // Scroll down para makita yung seed
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+    </script>
+
+</body>
+</html>

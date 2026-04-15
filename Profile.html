@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #ffffff;
+            --accent-blue: #007bff;
+            --accent-purple: #8a2be2;
+            --text-dark: #1a1d21;
+            --card-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; padding: 20px; 
+            background: var(--bg-white); color: var(--text-dark);
+            padding-bottom: 120px; /* Space para sa nav bar */
+        }
+
+        .profile-header { text-align: center; margin-bottom: 30px; }
+        .avatar-circle {
+            width: 80px; height: 80px; background: #eee;
+            border-radius: 50%; margin: 0 auto 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; border: 3px solid var(--accent-blue);
+        }
+
+        .ai-card {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 25px; padding: 20px; color: white;
+            margin-bottom: 25px; box-shadow: 0 10px 20px rgba(37, 117, 252, 0.2);
+        }
+
+        .ai-status {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; font-weight: 800; margin-bottom: 15px;
+        }
+
+        .toggle-ai {
+            background: rgba(255,255,255,0.2); padding: 5px 15px;
+            border-radius: 20px; cursor: pointer; border: 1px solid white;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block; font-size: 12px; font-weight: 800;
+            margin-bottom: 8px; color: #666; padding-left: 5px;
+        }
+
+        .wallet-input {
+            width: 100%; padding: 18px; border-radius: 15px;
+            border: 1px solid #eee; background: var(--card-gray);
+            font-family: monospace; font-size: 13px; outline: none;
+        }
+
+        .save-btn {
+            width: 100%; padding: 18px; border-radius: 15px;
+            background: var(--text-dark); color: white;
+            border: none; font-weight: 800; margin-top: 10px;
+        }
+
+        .stats-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: var(--card-gray); padding: 15px;
+            border-radius: 20px; text-align: center;
+        }
+
+        .stat-val { font-weight: 800; font-size: 16px; color: var(--accent-purple); }
+        .stat-lbl { font-size: 10px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <div class="avatar-circle">👤</div>
+        <h2 style="margin:0; font-size:18px;">User Settings</h2>
+        <p style="font-size:11px; color:#888;">AI Detection & Payout</p>
+    </div>
+
+    <div class="ai-card">
+        <div class="ai-status">
+            <span>AI NEURAL DETECTOR</span>
+            <span class="toggle-ai" id="aiBtn" onclick="toggleAI()">OFF</span>
+        </div>
+        <div style="font-size: 11px; opacity: 0.9; line-height: 1.4;">
+            When active, AI-driven algorithms will prioritize high-activity nodes for 10x faster address detection.
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>INPUT ADDRESS</label>
+        <input type="text" class="wallet-input" placeholder="ADDRESS" id="userWallet">
+    </div>
+
+    <button class="save-btn" onclick="saveSettings()">UPDATE PROFILE</button>
+
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-val" id="detectCount">0</div>
+            <div class="stat-lbl">AI DETECTED</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-val">PREMIUM</div>
+            <div class="stat-lbl">ACCOUNT STATUS</div>
+        </div>
+    </div>
+
+    <script>
+        let aiActive = false;
+
+        function toggleAI() {
+            aiActive = !aiActive;
+            const btn = document.getElementById('aiBtn');
+            btn.textContent = aiActive ? "ON - ACTIVE" : "OFF";
+            btn.style.background = aiActive ? "#00ff66" : "rgba(255,255,255,0.2)";
+            btn.style.color = aiActive ? "black" : "white";
+            
+            if(aiActive) {
+                alert("AI Neural Detector Activated: Scan speed increased by 10x.");
+            }
+        }
+
+        function saveSettings() {
+            const wallet = document.getElementById('userWallet').value;
+            if(wallet) {
+                localStorage.setItem('user_address', wallet);
+                alert("Address saved successfully!");
+            } else {
+                alert("Please input a valid address.");
+            }
+        }
+    </script>
+</body>
+</html>

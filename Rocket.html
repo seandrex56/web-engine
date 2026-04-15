@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #ffffff;
+            --neon-purple: #8a2be2;
+            --neon-red: #ff003c;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; padding: 20px; 
+            background: var(--bg-white);
+            height: 100vh; overflow: hidden;
+        }
+
+        /* DITO ANG MAGIC PARA MAPUNO ANG BOX */
+        #massLogWindow {
+            background: #1a1d21;
+            height: 350px; /* Mas mataas na box */
+            overflow-y: hidden;
+            font-family: 'Courier New', monospace;
+            font-size: 9px; /* Mas maliit na font para mas maraming kasya */
+            font-weight: 600;
+            line-height: 0.9; /* DIKIT-DIKIT PARA PUNO */
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 25px;
+            text-align: left;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-container { display: flex; gap: 15px; margin-bottom: 20px; }
+        .btn {
+            flex: 1; padding: 18px; border-radius: 15px;
+            border: none; font-weight: 800; font-size: 14px;
+            text-transform: uppercase; color: white; cursor: pointer;
+        }
+        .btn-stop { background: var(--neon-red); }
+        .btn-start { background: var(--neon-purple); }
+
+        .counter-box { text-align: center; font-size: 16px; font-weight: 800; }
+        .found-count { color: #888; font-size: 13px; margin-top: 5px; text-align: center; }
+
+        .results-window {
+            background: #f8f9fa; border-radius: 20px; height: 120px;
+            border: 1px solid #eee; margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="massLogWindow"></div>
+
+    <div class="btn-container">
+        <button class="btn btn-stop" onclick="window.stopScan()">STOP</button>
+        <button class="btn btn-start" onclick="window.startScan()">START</button>
+    </div>
+
+    <div class="counter-box">
+        Total inspection: <span id="totalIns" style="color: var(--neon-purple);">0</span> 
+    </div>
+    <div class="found-count">[ Found 0 ] ≈ 0.00$</div>
+
+    <div class="results-window"></div>
+
+    <script type="module">
+        import * as bip39 from "https://esm.sh/@scure/bip39";
+        import { wordlist } from "https://esm.sh/@scure/bip39/wordlists/english";
+
+        let running = false;
+        let total = 0;
+        const logWin = document.getElementById('massLogWindow');
+        const totalEl = document.getElementById('totalIns');
+
+        const fastWords = ["alpha", "bravo", "delta", "echo", "foxtrot", "hotel", "india", "juliet", "kilo", "lima", "mike", "november", "sierra", "tango"];
+
+        function fastBrute() {
+            if(!running) return;
+
+            // 15 entries kada frame para mabilis mapuno
+            for(let i = 0; i < 15; i++) {
+                total++;
+                const fakeSeed = Array.from({length: 12}, () => fastWords[Math.floor(Math.random() * fastWords.length)]).join(" ");
+                
+                const entry = document.createElement('div');
+                entry.textContent = `Balance: 0 | Wallet check: ${fakeSeed}`;
+                
+                logWin.prepend(entry);
+            }
+
+            // Hayaan nating umabot sa 50 lines para siksik sa box
+            while (logWin.childNodes.length > 50) {
+                logWin.removeChild(logWin.lastChild);
+            }
+
+            totalEl.textContent = total.toLocaleString();
+            requestAnimationFrame(fastBrute);
+        }
+
+        window.startScan = function() {
+            if(running) return;
+            running = true;
+            fastBrute();
+        };
+
+        window.stopScan = function() {
+            running = false;
+        };
+    </script>
+</body>
+</html>

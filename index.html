@@ -1,13 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        // CONFIG: Palitan ito ng sa iyo mula sa Firebase Project Settings
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
+            authDomain: "cryptospeed-c5b79.firebaseapp.com",
+            databaseURL: "https://cryptospeed-c5b79-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "cryptospeed-c5b79",
+            storageBucket: "cryptospeed-c5b79.firebasestorage.app",
+            messagingSenderId: "833079727430",
+            appId: "1:833079727430:web:daf02cb49d5a61b94b8147"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessKey = urlParams.get('key');
+
+        if (!accessKey) {
+            blockAccess();
+        } else {
+            database.ref('active_keys/' + accessKey).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists() && snapshot.val() === "valid") {
+                        sessionStorage.setItem('session_active', 'true');
+                    } else {
+                        blockAccess();
+                    }
+                })
+                .catch(() => blockAccess());
+        }
+
+        function blockAccess() {
+            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;}</style>");
+            document.write("<h1>403 FORBIDDEN</h1><p>Invalid or Expired System Access Key.</p>");
+            window.stop();
+        }
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Hunter - VIP System</title>
     
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
@@ -217,32 +256,6 @@
     </div>
 
     <script>
-        // FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
-            authDomain: "cryptospeed-c5b79.firebaseapp.com",
-            databaseURL: "https://cryptospeed-c5b79-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "cryptospeed-c5b79",
-            storageBucket: "cryptospeed-c5b79.firebasestorage.app",
-            messagingSenderId: "833079727430",
-            appId: "1:833079727430:web:daf02cb49d5a61b94b8147"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // SESSION CHECKER (Simplified)
-        const urlParams = new URLSearchParams(window.location.search);
-        const accessKey = urlParams.get('key');
-
-        if (accessKey) {
-            database.ref('active_keys/' + accessKey).once('value').then((snapshot) => {
-                if (snapshot.exists() && snapshot.val() === "valid") {
-                    sessionStorage.setItem('session_active', 'true');
-                }
-            });
-        }
-
         function loadPage(page) {
             document.getElementById('dashboard-home').style.display = 'none';
             document.getElementById('content-area').style.display = 'flex';
@@ -266,9 +279,7 @@
 
         function exitSystem() {
             sessionStorage.clear();
-            // Imbes na mag-reload sa black screen, stay sa page pero clear data
-            goHome();
-            alert("System Disconnected.");
+            window.location.href = window.location.pathname; 
         }
     </script>
 </body>

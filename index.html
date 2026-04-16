@@ -5,7 +5,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIG: Firebase Project Settings (Hindi ginalaw boss)
+        // CONFIG: Firebase Project Settings
         const firebaseConfig = {
             apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
             authDomain: "cryptospeed-c5b79.firebaseapp.com",
@@ -29,7 +29,6 @@
             database.ref('active_keys/' + accessKey).once('value')
                 .then((snapshot) => {
                     const dbValue = snapshot.val();
-                    // Keep bypass logic
                     if (snapshot.exists() && (dbValue === "valid" || appStatus === "valid" || (dbValue && dbValue.length > 5))) {
                         sessionStorage.setItem('session_active', 'true');
                     } else {
@@ -130,7 +129,8 @@
         }
 
         .card-item:active { transform: scale(0.95); background: #f8f9fa; }
-        /* Palitan images ng icon style */
+        
+        /* Style para sa mga Icons */
         .card-item i { font-size: 32px; margin-bottom: 10px; }
         .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
 
@@ -209,22 +209,28 @@
             <span class="section-title">Engines Available</span>
             <div class="grid">
                 <div class="card-item" onclick="loadPage('Eth.html')">
-                    <i class="fa-brands fa-ethereum" style="color: #627EEA;"></i><span>ETHEREUM</span>
+                    <i class="fa-brands fa-ethereum" style="color: #627EEA;"></i>
+                    <span>ETHEREUM</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Btc.html')">
-                    <i class="fa-brands fa-bitcoin" style="color: #F7931A;"></i><span>BITCOIN</span>
+                    <i class="fa-brands fa-bitcoin" style="color: #F7931A;"></i>
+                    <span>BITCOIN</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Bnb.html')">
-                    <i class="fa-solid fa-coins" style="color: #F3BA2F;"></i><span>BINANCE</span>
+                    <i class="fa-solid fa-coins" style="color: #F3BA2F;"></i>
+                    <span>BINANCE</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Tron.html')">
-                    <i class="fa-solid fa-diamond" style="color: #FF0013;"></i><span>TRON</span>
+                    <i class="fa-solid fa-diamond" style="color: #FF0013;"></i>
+                    <span>TRON</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Doge.html')">
-                    <i class="fa-solid fa-paw" style="color: #C2A633;"></i><span>DOGE</span>
+                    <i class="fa-solid fa-paw" style="color: #C2A633;"></i>
+                    <span>DOGE</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Sol.html')">
-                    <i class="fa-solid fa-bolt-lightning" style="color: #14F195;"></i><span>SOLANA</span>
+                    <i class="fa-solid fa-bolt-lightning" style="color: #14F195;"></i>
+                    <span>SOLANA</span>
                 </div>
             </div>
         </div>

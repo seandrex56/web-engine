@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crypto Hunter - VIP System</title>
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -45,8 +42,16 @@
         }
 
         function blockAccess() {
-            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;padding:20px;}</style>");
-            document.write("<h1>403 FORBIDDEN</h1><p>Invalid or Expired System Access Key.</p>");
+            document.write(`
+                <style>
+                    body { background:#000; color:#ff3b3b; display:flex; justify-content:center; align-items:center; height:100vh; font-family:monospace; flex-direction:column; text-align:center; padding:20px; margin:0; }
+                    .blink { animation: blinker 1s linear infinite; font-size: 40px; font-weight: bold; }
+                    @keyframes blinker { 50% { opacity: 0; } }
+                </style>
+                <div style="font-size: 80px; margin-bottom: 20px;">🔒</div>
+                <div class="blink">403 FORBIDDEN</div>
+                <p style="letter-spacing: 2px;">INVALID OR EXPIRED SYSTEM KEY</p>
+            `);
             window.stop();
         }
     </script>
@@ -57,7 +62,6 @@
             --card-bg: #ffffff;
             --accent-blue: #0062ff;
             --text-main: #1a1c1e;
-            --text-sub: #6c757d;
             --border: #edf2f7;
             --shadow: 0 10px 30px rgba(0,0,0,0.04);
         }
@@ -65,7 +69,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+            font-family: sans-serif; 
             margin: 0; 
             background: var(--bg-color); 
             color: var(--text-main);
@@ -94,7 +98,7 @@
         }
 
         .welcome-card h1 { font-size: 22px; margin: 0; font-weight: 800; color: var(--accent-blue); }
-        .welcome-card p { font-size: 12px; color: #2ecc71; margin-top: 4px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .welcome-card p { font-size: 11px; color: #2ecc71; margin-top: 4px; font-weight: 800; }
 
         .engine-container {
             background: var(--card-bg);
@@ -127,17 +131,16 @@
 
         .card-item:active { transform: scale(0.95); background: #f8f9fa; }
         
-        /* FIX 2: Style para sigurado ang paglabas ng icons */
-        .card-item i { font-size: 38px !important; margin-bottom: 12px; display: block !important; }
+        /* Icon Sizing */
+        .card-item svg { width: 42px; height: 42px; margin-bottom: 12px; }
         .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
 
         #content-area {
             display: none;
-            flex-grow: 1;
-            flex-direction: column;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #fff;
             z-index: 2000;
+            flex-direction: column;
         }
 
         .header-nav {
@@ -146,11 +149,6 @@
             align-items: center;
             gap: 15px;
             border-bottom: 1px solid var(--border);
-        }
-
-        .btn-round { 
-            background: #f1f3f5; border: none; width: 40px; height: 40px;
-            border-radius: 12px; cursor: pointer; color: var(--text-main); font-size: 18px;
         }
 
         #content-frame { flex-grow: 1; border: none; width: 100%; }
@@ -175,12 +173,13 @@
             flex-direction: column;
             align-items: center;
             color: #adb5bd;
-            font-size: 20px;
+            font-size: 10px;
+            font-weight: 800;
             cursor: pointer;
         }
         
         .nav-btn.active { color: var(--accent-blue); }
-        .nav-btn span { font-size: 10px; font-weight: 700; margin-top: 4px; }
+        .nav-btn svg { width: 22px; height: 22px; margin-bottom: 5px; }
 
         .logout-link {
             text-align: center;
@@ -198,34 +197,34 @@
     <div id="dashboard-home">
         <div class="welcome-card">
             <h1>Crypto Hunter</h1>
-            <p><i class="fa-solid fa-circle-check"></i> VIP SYSTEM ACTIVE</p>
+            <p>● VIP SYSTEM ACTIVE</p>
         </div>
 
         <div class="engine-container">
             <span class="section-title">Engines Available</span>
             <div class="grid">
                 <div class="card-item" onclick="loadPage('Eth.html')">
-                    <i class="fa-brands fa-ethereum" style="color: #627EEA;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#627EEA" d="M16 32l-16-9.5 16-9.5 16 9.5-16 9.5zM16 0l16 22.5-16 9.5-16-9.5 16-22.5z"/></svg>
                     <span>ETHEREUM</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Btc.html')">
-                    <i class="fa-brands fa-bitcoin" style="color: #F7931A;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#F7931A" d="M16 32c8.837 0 16-7.163 16-16s-7.163-16-16-16-16 7.163-16 16 7.163 16 16 16zm7.662-18.991c.232 1.549-.946 2.383-2.556 2.938.931.215 1.632.827 1.83 2.09.296 1.886-.733 2.903-2.733 3.398l-.75 3.007-1.83-.456.731-2.934c-.482-.12-.962-.232-1.436-.347l-.736 2.952-1.83-.456.75-3.008c-.398-.09-.785-.178-1.16-.273l-2.525-.629.479-1.921s1.359.311 1.33.33c.742.185.876-.275.99-.434l1.17-4.694c.07-.176-.24-.405-.623-.5l-1.334-.333.421-1.691 2.383.595c.44.11.871.226 1.294.331l.756-3.033 1.83.456-.75 3.01c.501.114.992.221 1.472.32l.74-2.966 1.83.456-.756 3.035c3.124.781 3.238 2.227 2.766 4.39z"/></svg>
                     <span>BITCOIN</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Bnb.html')">
-                    <i class="fa-solid fa-coins" style="color: #F3BA2F;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#F3BA2F" d="M16 0L11.3 4.7 16 9.4l4.7-4.7L16 0zM4.7 11.3L0 16l4.7 4.7 4.7-4.7-4.7-4.7zm22.6 0l-4.7 4.7 4.7 4.7 4.7-4.7-4.7-4.7zM16 11.3l-4.7 4.7 4.7 4.7 4.7-4.7-4.7-4.7zM11.3 27.3L16 32l4.7-4.7-4.7-4.7-4.7 4.7z"/></svg>
                     <span>BINANCE</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Tron.html')">
-                    <i class="fa-solid fa-diamond" style="color: #FF0013;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#FF0013" d="M24.5 12.5l-8.5-9.5-8.5 9.5 8.5 3 8.5-3zm-17 3l8.5 13.5 8.5-13.5-8.5-3-8.5 3z"/></svg>
                     <span>TRON</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Doge.html')">
-                    <i class="fa-solid fa-paw" style="color: #C2A633;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#C2A633" d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zm-4.722 22.846c-1.841 0-3.333-1.492-3.333-3.333s1.492-3.333 3.333-3.333 3.333 1.492 3.333 3.333-1.492 3.333-3.333 3.333zm4.722-10.846c-1.841 0-3.333-1.492-3.333-3.333s1.492-3.333 3.333-3.333 3.333 1.492 3.333 3.333-1.492 3.333-3.333 3.333zm4.722 10.846c-1.841 0-3.333-1.492-3.333-3.333s1.492-3.333 3.333-3.333 3.333 1.492 3.333 3.333-1.492 3.333-3.333 3.333z"/></svg>
                     <span>DOGE</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Sol.html')">
-                    <i class="fa-solid fa-bolt-lightning" style="color: #14F195;"></i>
+                    <svg viewBox="0 0 32 32"><path fill="#14F195" d="M29.5 7.5l-7.5-3.5-7.5 3.5 7.5 3.5 7.5-3.5zm-15-3.5l-7.5 3.5 7.5 3.5 7.5-3.5-7.5-3.5zm0 15l-7.5 3.5 7.5 3.5 7.5-3.5-7.5-3.5zm15 3.5l-7.5-3.5-7.5 3.5 7.5 3.5 7.5-3.5z"/></svg>
                     <span>SOLANA</span>
                 </div>
             </div>
@@ -236,28 +235,24 @@
 
     <div id="content-area">
         <div class="header-nav">
-            <button class="btn-round" onclick="goHome()"><i class="fa-solid fa-chevron-left"></i></button>
-            <span id="label-top" style="font-weight: 800; font-size: 12px; color: var(--accent-blue);">ENGINE ACTIVE</span>
+            <button onclick="goHome()" style="background:#f1f3f5; border:none; padding:10px 15px; border-radius:10px; font-weight:bold;">BACK</button>
+            <span id="label-top" style="font-weight: 800; font-size: 14px; color: var(--accent-blue); margin-left: 10px;">ENGINE ACTIVE</span>
         </div>
         <iframe id="content-frame" src=""></iframe>
     </div>
 
     <div class="nav-bar">
         <div class="nav-btn active" id="n-home" onclick="goHome()">
-            <i class="fa-solid fa-house"></i>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span>Home</span>
         </div>
         <div class="nav-btn" id="n-wallet" onclick="loadPage('Withdraw.html')">
-            <i class="fa-solid fa-wallet"></i>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
             <span>Wallet</span>
         </div>
         <div class="nav-btn" id="n-rocket" onclick="loadPage('Rocket.html')">
-            <i class="fa-solid fa-rocket"></i>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.13 22.19L11.5 18.35L9.87 22.19L11.5 21L13.13 22.19M13 2H9C7.9 2 7 2.9 7 4V15C7 15.55 7.45 16 8 16H14C14.55 16 15 15.55 15 15V4C15 2.9 14.1 2 13 2M11 14C10.17 14 9.5 13.33 9.5 12.5S10.17 11 11 11 12.5 11.67 12.5 12.5 11.83 14 11 14M15.45 17.5L13 17.5L12.5 16H10.5L10 17.5L7.55 17.5C6.7 17.5 6 18.2 6 19.05V20H17V19.05C17 18.2 16.3 17.5 15.45 17.5Z"/></svg>
             <span>Boost</span>
-        </div>
-        <div class="nav-btn" id="n-user" onclick="loadPage('Profile.html')">
-            <i class="fa-solid fa-user"></i>
-            <span>Account</span>
         </div>
     </div>
 
@@ -276,7 +271,7 @@
             else if(page.includes('Rocket')) document.getElementById('n-rocket').classList.add('active');
             else if(page.includes('Profile')) document.getElementById('n-user').classList.add('active');
 
-            document.getElementById('label-top').textContent = page.split('.')[0].toUpperCase() + " ACTIVE";
+            document.getElementById('label-top').textContent = page.split('.')[0].toUpperCase() + " ENGINE ACTIVE";
         }
 
         function goHome() {

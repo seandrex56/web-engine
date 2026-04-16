@@ -5,7 +5,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIG: Firebase Project Settings
+        // CONFIG: Firebase Project Settings (Sync sa Java mo boss)
         const firebaseConfig = {
             apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
             authDomain: "cryptospeed-c5b79.firebaseapp.com",
@@ -23,12 +23,15 @@
         const accessKey = urlParams.get('key');
         const appStatus = urlParams.get('status'); 
 
+        // SECURITY CHECK: Sync sa Java Rules
         if (!accessKey) {
             blockAccess();
         } else {
             database.ref('active_keys/' + accessKey).once('value')
                 .then((snapshot) => {
                     const dbValue = snapshot.val();
+                    
+                    // Kung 'valid' o kung may Device ID na (length > 5), papasukin.
                     if (snapshot.exists() && (dbValue === "valid" || appStatus === "valid" || (dbValue && dbValue.length > 5))) {
                         sessionStorage.setItem('session_active', 'true');
                     } else {
@@ -96,7 +99,7 @@
         }
 
         .welcome-card h1 { font-size: 22px; margin: 0; font-weight: 800; color: var(--accent-blue); }
-        .welcome-card p { font-size: 12px; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
+        .welcome-card p { font-size: 12px; color: #2ecc71; margin-top: 4px; font-weight: 600; }
 
         .engine-container {
             background: var(--card-bg);
@@ -124,14 +127,13 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
-            text-decoration: none;
             cursor: pointer;
         }
 
         .card-item:active { transform: scale(0.95); background: #f8f9fa; }
         
-        /* Style para sa mga Icons */
-        .card-item i { font-size: 32px; margin-bottom: 10px; }
+        /* ICONS STYLE - Siguradong lalabas ito boss */
+        .card-item i { font-size: 35px; margin-bottom: 12px; }
         .card-item span { font-size: 11px; font-weight: 800; color: var(--text-main); }
 
         #content-area {
@@ -180,7 +182,6 @@
             color: #adb5bd;
             font-size: 20px;
             cursor: pointer;
-            transition: 0.3s;
         }
         
         .nav-btn.active { color: var(--accent-blue); }
@@ -193,7 +194,7 @@
             font-size: 11px;
             font-weight: 800;
             cursor: pointer;
-            text-decoration: none;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -202,7 +203,7 @@
     <div id="dashboard-home">
         <div class="welcome-card">
             <h1>Crypto Hunter</h1>
-            <p><i class="fa-solid fa-circle-check"></i> System Connected (VIP)</p>
+            <p><i class="fa-solid fa-shield-check"></i> VIP SYSTEM ACTIVE</p>
         </div>
 
         <div class="engine-container">
@@ -221,7 +222,7 @@
                     <span>BINANCE</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Tron.html')">
-                    <i class="fa-solid fa-diamond" style="color: #FF0013;"></i>
+                    <i class="fa-solid fa-gem" style="color: #FF0013;"></i>
                     <span>TRON</span>
                 </div>
                 <div class="card-item" onclick="loadPage('Doge.html')">
@@ -235,7 +236,7 @@
             </div>
         </div>
 
-        <div class="logout-link" onclick="exitSystem()">DISCONNECT SYSTEM</div>
+        <div class="logout-link" onclick="exitSystem()">DISCONNECT VIP SYSTEM</div>
     </div>
 
     <div id="content-area">
@@ -267,6 +268,12 @@
 
     <script>
         function loadPage(page) {
+            // Security check bago i-load ang engine
+            if (sessionStorage.getItem('session_active') !== 'true') {
+                blockAccess();
+                return;
+            }
+
             document.getElementById('dashboard-home').style.display = 'none';
             document.getElementById('content-area').style.display = 'flex';
             document.getElementById('content-frame').src = page;
@@ -289,7 +296,7 @@
 
         function exitSystem() {
             sessionStorage.clear();
-            window.location.href = window.location.pathname; 
+            window.location.reload();
         }
     </script>
 </body>

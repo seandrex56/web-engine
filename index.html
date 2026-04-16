@@ -5,7 +5,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIG: Palitan ito ng sa iyo mula sa Firebase Project Settings
+        // CONFIG: Firebase Project Settings
         const firebaseConfig = {
             apiKey: "AIzaSyB2O4P2J5UuGYrl-eKsmshLEBfAW-pu9SM",
             authDomain: "cryptospeed-c5b79.firebaseapp.com",
@@ -21,13 +21,22 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const accessKey = urlParams.get('key');
+        const appStatus = urlParams.get('status'); // Bypass galing sa Java App
 
         if (!accessKey) {
             blockAccess();
         } else {
             database.ref('active_keys/' + accessKey).once('value')
                 .then((snapshot) => {
-                    if (snapshot.exists() && snapshot.val() === "valid") {
+                    const dbValue = snapshot.val();
+                    
+                    // FIXED LOGIC:
+                    // 1. snapshot.exists() = Dapat existing yung key.
+                    // 2. (dbValue === "valid" || appStatus === "valid" || dbValue.length > 5)
+                    //    - Papasukin kung bago pa ang key ("valid").
+                    //    - Papasukin kung ang Java ay nagpasa ng status=valid (Bypass).
+                    //    - Papasukin kung may naka-save nang Device ID (length > 5).
+                    if (snapshot.exists() && (dbValue === "valid" || appStatus === "valid" || (dbValue && dbValue.length > 5))) {
                         sessionStorage.setItem('session_active', 'true');
                     } else {
                         blockAccess();
@@ -37,7 +46,7 @@
         }
 
         function blockAccess() {
-            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;}</style>");
+            document.write("<style>body{background:#000;color:#ff3b3b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;padding:20px;}</style>");
             document.write("<h1>403 FORBIDDEN</h1><p>Invalid or Expired System Access Key.</p>");
             window.stop();
         }
